@@ -75,28 +75,42 @@ For a focused task, point the agent to the relevant specialist `SKILL.md` instea
 
 ### Option C — manual installation
 
-1. Clone or download this repository.
-2. Copy the desired skill directories (each contains a `SKILL.md`) into the skill discovery location supported by your agent.
-3. Preserve the directory name and `SKILL.md` filename.
-4. Restart or refresh the agent if its skill discovery requires it.
-5. Ask the agent to list the skill it discovered and summarize its activation instructions.
-
 ```bash
 git clone https://github.com/shinnida220/premium-website-design-skills.git
+cd premium-website-design-skills
 ```
 
-### Agent compatibility
+Copy the desired directories from `skills/` into the discovery root documented by your agent. Preserve the directory name and `SKILL.md` filename, then reload skills if required.
 
-The pack uses the open Agent Skills convention: a skill directory containing a `SKILL.md` with YAML frontmatter (`name` and `description`). Many agents support this format directly or through an adapter. **Discovery paths and installation behavior are agent- and version-specific**; do not assume one path works everywhere.
+### Agent compatibility and direct installation
 
-Common project-level conventions include:
+PWDS follows the open Agent Skills format. Current documented project-level discovery locations include:
 
+- Codex: `.agents/skills/<skill-name>/SKILL.md`
 - Claude Code: `.claude/skills/<skill-name>/SKILL.md`
-- Codex and compatible agents: `.agents/skills/<skill-name>/SKILL.md`
-- Cursor: check the current Cursor documentation for its supported project skill/agent-rule locations.
-- Gemini CLI, Windsurf, Cline, and other agents: check the current version's documentation for Agent Skills discovery or supported import paths.
+- Cursor: `.cursor/skills/<skill-name>/SKILL.md` and supported shared aliases
+- Gemini CLI: `.gemini/skills/<skill-name>/SKILL.md` and the `.agents/skills` alias
 
-If an agent supports only a different rules format, ask it to adapt the skill instructions into that format while retaining the workflow and quality gates. Do not copy the whole pack into every location without checking the agent's discovery behavior.
+Use the included installer for deterministic copies:
+
+```bash
+# Universal location shared by compatible agents
+node scripts/install.mjs --agent universal --scope project
+
+# Agent-specific project location
+node scripts/install.mjs --agent codex --scope project
+
+# User-level installation
+node scripts/install.mjs --agent claude --scope user
+
+# Preview or intentionally replace existing skill folders
+node scripts/install.mjs --agent all --scope project --dry-run
+node scripts/install.mjs --agent codex --scope project --force
+```
+
+The installer skips existing skill folders unless `--force` is supplied. `--agent all` creates separate copies in four agent roots and may cause duplicate discovery in agents that scan multiple roots; prefer `universal` when the agent documents support for `.agents/skills`.
+
+Read [docs/agent-compatibility.md](docs/agent-compatibility.md) for the compatibility matrix, smoke test, caveats, and official documentation links. Agent discovery behavior changes over time; verify the current vendor documentation before relying on a path or feature.
 
 ## Expected workflow
 
@@ -174,6 +188,14 @@ Use these as representative inspection sizes, not mandatory CSS breakpoints:
 
 Also test intermediate widths around layout transitions and actual supported device/browser combinations when known.
 
+## Visual reference library
+
+PWDS includes original, framework-neutral SVG studies for composition anatomy, type hierarchy, semantic color, responsive transformation, and interaction states. These are visual teaching aids—not fixed templates. Read [the visual library guide](references/visual-library/README.md) and inspect only the references relevant to the current task.
+
+## Benchmark suite
+
+The five benchmark briefs cover premium SaaS, enterprise services, e-commerce, analytics dashboards, and creative studio portfolios. They include realistic requirements, interaction expectations, content-integrity constraints, viewport targets, and acceptance criteria. See [benchmarks/README.md](benchmarks/README.md) for the repeatable baseline-versus-PWDS evaluation protocol and scorecard.
+
 ## Browser and accessibility verification
 
 PWDS encourages real rendered inspection. Useful tools include:
@@ -204,39 +226,57 @@ Always verify each asset's license, attribution, usage limits, and suitability b
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
 ├── package.json
-├── skills/
+├── skills/                         # 17 independently loadable skills
 │   ├── pwds-orchestrator/SKILL.md
 │   ├── brand-art-direction/SKILL.md
 │   ├── visual-style-selector/SKILL.md
 │   ├── design-system-architect/SKILL.md
 │   ├── visual-composition/SKILL.md
 │   ├── responsive-craft/SKILL.md
-│   └── design-critique/SKILL.md
+│   ├── design-critique/SKILL.md
+│   ├── typography-mastery/SKILL.md
+│   ├── color-intelligence/SKILL.md
+│   ├── premium-imagery/SKILL.md
+│   ├── conversion-design/SKILL.md
+│   ├── interaction-design/SKILL.md
+│   ├── motion-design/SKILL.md
+│   ├── dashboard-design/SKILL.md
+│   ├── ecommerce-design/SKILL.md
+│   ├── mobile-web-design/SKILL.md
+│   └── visual-regression-review/SKILL.md
 ├── profiles/
 │   ├── premium-commercial.md
 │   ├── award-winning.md
 │   ├── enterprise-corporate.md
 │   └── hybrid.md
+├── docs/
+│   └── agent-compatibility.md
 ├── references/
 │   ├── anti-patterns.md
 │   ├── visual-review-checklist.md
-│   └── browser-verification.md
+│   ├── browser-verification.md
+│   └── visual-library/              # five original SVG visual studies
+├── benchmarks/                      # five repeatable website briefs
 ├── examples/
 │   └── project-briefs.md
 ├── scripts/
+│   ├── install.mjs
 │   └── validate-skills.mjs
 └── .github/workflows/validate.yml
 ```
 
-## Validation
+## Validation and installation
 
 Requires Node.js 20 or later. No third-party runtime dependency is needed.
 
 ```bash
 npm run validate
+npm run install:help
 ```
 
-The validator checks that each skill has a valid directory/filename pairing, required frontmatter fields, and non-empty instructions. It is a lightweight structural check, not a full YAML parser or a guarantee that every agent will discover the skills.
+The installer supports Codex, Claude Code, Cursor, Gemini CLI, a shared `.agents/skills` location, and an explicit all-target mode. It skips existing destinations unless `--force` is supplied. Use `--dry-run` to preview paths. See the compatibility guide before choosing a target.
+
+The validator checks all skill directories and their frontmatter, benchmark brief structure, visual reference assets, installer presence, and package/changelog version consistency. It is a structural guard, not a full YAML parser, an agent runtime test, or proof that a website meets the visual rubric.
 
 ## Existing tools and skills worth integrating
 
@@ -265,20 +305,13 @@ Review each project's current license and installation instructions before integ
 
 ## Roadmap
 
-Potential future specialist skills, to be added when they can provide distinct, actionable workflows:
+- [x] 1.0 — Core orchestrator, profiles, and foundational design skills.
+- [x] 1.1 — Ten specialist skills for typography, color, imagery, conversion, interaction, motion, dashboards, e-commerce, mobile web, and visual regression.
+- [x] 1.2 — Agent compatibility guide and installer, original visual reference library, five benchmark briefs, and expanded structural validation.
+- [ ] 1.3 — Run and publish paired benchmark results across multiple agent/model combinations; add browser automation fixtures where maintainable.
+- [ ] Future — Expand reference examples only where evaluation identifies a concrete skill gap.
 
-- Typography mastery and type pairing.
-- Color intelligence and contrast-aware palette systems.
-- Premium imagery and art-directed asset selection.
-- Conversion-focused landing-page design.
-- Interaction design and micro-interaction craft.
-- Motion design and reduced-motion-aware animation.
-- Dashboard and data-dense product design.
-- E-commerce experience design.
-- Mobile-first web application design.
-- Visual regression and screenshot comparison review.
-
-Potential future tooling includes optional agent-specific installers, richer reference assets, example implementations, and expanded automated checks. These will be added only with clear maintenance and compatibility expectations.
+Compatibility documentation is evidence-based but not a certification. Benchmark results should be published only after real runs with recorded agent versions, evidence, and review methodology.
 
 ## Contributing
 
