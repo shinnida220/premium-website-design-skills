@@ -19,4 +19,4 @@ This directory stores reproducible benchmark runs and evidence. A benchmark resu
 
 ## Agents
 
-This evaluation currently targets Lovable and Claude Code. Tool availability is independent: a Lovable project-generation connection does not imply a Claude Code runtime, and vice versa. If an agent cannot be executed in the current environment, record the run as blocked and provide the local handoff instructions rather than claiming completion.
+This evaluation currently targets Lovable and OpenCode. The Lovable and OpenCode execution environments are independent: access to one does not imply access to the other. OpenCode is run through an isolated GitHub Actions cloud runner using the OpenCode hosted provider. If an agent cannot be executed in the current environment, record the run as blocked and provide the handoff instructions rather than claiming completion.
