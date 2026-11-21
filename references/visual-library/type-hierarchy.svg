@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+<title id="title">Typography hierarchy reference</title><desc id="desc">Display, heading, body, label, and caption examples with relative scale and role descriptions.</desc>
+<rect width="1200" height="640" rx="24" fill="#f7f5f0"/><text x="64" y="72" font-family="Arial" font-size="16" letter-spacing="3" fill="#8a5b35">TYPE SYSTEM STUDY</text>
+<text x="64" y="178" font-family="Georgia,serif" font-size="88" fill="#202020">Display with intent.</text><text x="64" y="224" font-family="Arial" font-size="16" fill="#777">DISPLAY / emotional entry point / use sparingly</text>
+<line x1="64" y1="252" x2="1136" y2="252" stroke="#d7d0c5"/>
+<text x="64" y="330" font-family="Arial" font-size="48" font-weight="bold" fill="#242424">Section heading</text><text x="64" y="362" font-family="Arial" font-size="15" fill="#777">HEADING / navigation through the content</text>
+<line x1="64" y1="390" x2="1136" y2="390" stroke="#d7d0c5"/>
+<text x="64" y="444" font-family="Arial" font-size="22" fill="#333">Body copy carries the explanation. Comfortable line length,</text><text x="64" y="474" font-family="Arial" font-size="22" fill="#333">appropriate line height, and readable contrast matter more</text><text x="64" y="504" font-family="Arial" font-size="22" fill="#333">than chasing a particular font size.</text>
+<text x="64" y="560" font-family="Arial" font-size="14" font-weight="bold" letter-spacing="2" fill="#8a5b35">LABEL / EYEBROW</text><text x="64" y="594" font-family="Arial" font-size="13" fill="#777">CAPTION / metadata and supporting detail</text><text x="1136" y="594" text-anchor="end" font-family="Arial" font-size="13" fill="#777">Scale is contextual; test at real viewports.</text></svg>
