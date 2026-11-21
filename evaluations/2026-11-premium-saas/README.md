@@ -1,8 +1,8 @@
 # Evaluation 01 — Northstar premium SaaS website
 
-**Status:** Prepared; agent execution pending  
+**Status:** Prepared; cloud runner configured; execution pending provider secret  
 **Benchmark:** [Premium SaaS brief](../../benchmarks/premium-saas.md)  
-**Target agents:** Lovable and Claude Code  
+**Target agents:** Lovable and OpenCode (OpenCode Zen / Console provider)  
 **Conditions:** baseline and PWDS-assisted for each agent  
 **Run count:** four paired-condition builds (two per agent)
 
@@ -39,10 +39,10 @@ Required viewports: 360×800, 390×844, 768×1024, 1366×768, 1440×900. Also in
 
 1. Lovable baseline
 2. Lovable + PWDS
-3. Claude Code baseline
-4. Claude Code + PWDS
+3. OpenCode baseline
+4. OpenCode + PWDS
 
-Each run starts from a clean project/repository. Use the same agent/model version for the paired runs. If the model/version changes between paired conditions, mark the comparison as confounded.
+Each run starts from a clean, isolated project directory. Use the same agent version and exact model ID for the paired runs. If the model/provider/tool version changes between paired conditions, mark the comparison as confounded. The OpenCode workflow executes its two conditions sequentially in separate clean directories and uses one model input for both.
 
 ## Time budget
 
@@ -53,7 +53,26 @@ Use a maximum of 45 minutes of active agent build time per run. Record actual el
 - Baseline: [baseline-prompt.md](baseline-prompt.md)
 - PWDS-assisted: [pwds-prompt.md](pwds-prompt.md)
 
-The prompt body and product brief are intentionally identical; the only experimental variable is whether PWDS skills are available and explicitly invoked. The PWDS prompt names the minimum relevant skills. Do not paste the skill instructions into the baseline condition.
+The prompt body and product brief are intentionally identical; the only experimental variable is whether PWDS skills are available and explicitly invoked. The PWDS prompt names the minimum relevant skills. Do not expose the PWDS skill pack, profile, or reference files to the baseline OpenCode run.
+
+## OpenCode cloud runner
+
+The workflow is [Northstar OpenCode benchmark](../../.github/workflows/northstar-opencode-benchmark.yml). It runs on GitHub-hosted Ubuntu runners and creates two separate temporary workspaces:
+
+- **Baseline:** receives only the baseline prompt. No PWDS skill directories, profiles, or references are installed or copied into this workspace.
+- **PWDS-assisted:** receives the same brief and prompt plus the PWDS skills installed into `.agents/skills` (the portable skills directory OpenCode discovers), the Premium / Commercial profile, and PWDS references.
+
+Both conditions use the same OpenCode CLI version, OpenCode hosted provider, model ID, and 45-minute timeout in one workflow dispatch. The default model selected for this benchmark is `opencode/gpt-5.3-codex`; it is a coding-focused model in the current hosted model catalog. The workflow allows an explicit model override, but changing it between paired runs invalidates a direct comparison.
+
+### One-time setup
+
+1. Create an OpenCode hosted-provider API key from the [OpenCode Console](https://opencode.ai/). The hosted model catalogue was previously branded Zen; current official documentation labels the hosted service Console.
+2. In GitHub, open **Settings → Secrets and variables → Actions → New repository secret**.
+3. Add the secret named `OPENCODE_API_KEY` and paste the provider key there. Never commit it or paste it into a prompt.
+4. Open **Actions → Northstar OpenCode benchmark → Run workflow**. Keep the default model unless there is a deliberate reason to change it.
+5. Download the `northstar-opencode-<run-id>` artifact after completion. It contains the two isolated source trees, prompts, OpenCode logs, and run metadata.
+
+The workflow does not publish either website and does not claim browser, screenshot, accessibility, or Lighthouse verification. Those checks remain part of the evidence/reviewer stage in the scorecard. If the secret is missing or the provider rejects the model/key, the workflow fails and uploads any evidence produced; that is a blocked run, not a zero score.
 
 ## Evidence capture
 
@@ -69,7 +88,7 @@ For each run, preserve:
 - Any Lighthouse/Web Vitals report, with run conditions.
 - Reviewer scorecard and confidence notes.
 
-Do not publish a project just to obtain evidence unless publishing is necessary and the workspace owner approves it. Preview links are sufficient when accessible.
+The OpenCode workflow preserves source trees and execution logs as artifacts but does not itself publish or visually inspect the generated websites. Do not publish a project just to obtain evidence unless publishing is necessary and the workspace owner approves it. Preview links are sufficient when accessible.
 
 ## Scoring and hard gates
 
@@ -77,8 +96,8 @@ Use [scorecard.md](scorecard.md). Apply the 100-point rubric in the benchmark RE
 
 ## Comparison
 
-Report per-agent score deltas (PWDS minus baseline), hard-gate results, elapsed time, defect counts by severity, and evidence completeness. Do not aggregate Lovable and Claude Code into a single headline number if their models or environments differ. Do not claim statistical significance from one paired run per agent.
+Report per-agent score deltas (PWDS minus baseline), hard-gate results, elapsed time, defect counts by severity, and evidence completeness. Do not aggregate Lovable and OpenCode into a single headline number if their models or environments differ. Do not claim statistical significance from one paired run per agent.
 
 ## Execution status
 
-Cloud execution was attempted through the available Lovable integration, but the workspace/profile calls and project creation returned internal tool errors. No Lovable project was successfully created. No Claude Code execution tool/session is exposed in the current connected tool set. These are environment blockers, not benchmark results. Re-attempt cloud execution when Lovable access is healthy; Claude Code requires an accessible session or a local run by the user.
+Lovable is authenticated and the connected workspace is available; the first Northstar build has not yet been run. The OpenCode GitHub Actions runner is configured in this PR but cannot execute until the repository secret `OPENCODE_API_KEY` is added. No benchmark scores or agent-performance claims are made at this stage.
