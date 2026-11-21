@@ -73,7 +73,7 @@ try {
           if (target.origin !== new URL(baseUrl).origin) {
             return { ...link, checked: false, reason: "external" };
           }
-          if (target.hash) {
+          if (target.hash && target.hash.length > 1) {
             const exists = await page.evaluate(hash => Boolean(document.getElementById(decodeURIComponent(hash))), target.hash.slice(1));
             if (target.pathname === new URL(route.path, baseUrl).pathname) {
               return { ...link, checked: true, ok: exists, reason: exists ? "anchor-found" : "anchor-missing" };
@@ -115,7 +115,7 @@ try {
           applicable: true,
           hasLabelledControls: [...node.querySelectorAll("input, textarea, select, button")].every(control =>
             control.type === "hidden" || control.type === "submit" ||
-            Boolean(control.labels?.length || control.getAttribute("aria-label") || control.getAttribute("aria-labelledby"))
+            Boolean(control.labels?.length || control.getAttribute("aria-label") || control.getAttribute("aria-labelledby") || (control.tagName === "BUTTON" && control.textContent.trim()))
           ),
           hasEmailField: Boolean(node.querySelector('input[type="email"]')),
           requiredControlCount: node.querySelectorAll("[required]").length
