@@ -186,7 +186,7 @@ const lines = [
   "## Route / viewport results",
   "",
   "| Route | Viewport | HTTP | Overflow | Page errors | Console errors | Broken internal links | Axe violations |",
-  "|---|---:|---:|---|---:|---:|---:|"
+  "|---|---:|---:|---|---:|---:|---:|---:|"
 ];
 for (const route of results.routes) {
   for (const item of route.viewports) {
