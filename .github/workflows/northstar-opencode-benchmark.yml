@@ -22,7 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 105
     env:
-      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
       MODEL: ${{ inputs.model }}
       RUN_ROOT: ${{ runner.temp }}/northstar-opencode-runs
 
@@ -32,12 +31,15 @@ jobs:
 
       - name: Validate provider secret and selected model
         shell: bash
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           set -euo pipefail
           if [[ -z "${OPENCODE_API_KEY:-}" ]]; then
             echo "::error::Missing repository secret OPENCODE_API_KEY. Add it under Settings → Secrets and variables → Actions."
             exit 1
           fi
+          echo "::add-mask::$OPENCODE_API_KEY"
           if [[ ! "$MODEL" =~ ^opencode/[a-zA-Z0-9._-]+$ ]]; then
             echo "::error::Model must use the opencode/<model-id> format."
             exit 1
@@ -61,6 +63,8 @@ jobs:
 
       - name: Run isolated baseline and PWDS conditions
         shell: bash
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           set -Eeuo pipefail
           mkdir -p "$RUN_ROOT"
@@ -107,6 +111,8 @@ jobs:
               echo "- Result: $([[ "$status" -eq 0 ]] && echo completed || echo blocked/failed)"
             } >> "$run_dir/run-metadata.md"
 
+            # Do not preserve a provider credential in downloadable logs.
+            node -e 'const fs=require("node:fs"); const p=process.argv[1]; const key=process.env.OPENCODE_API_KEY; if(key){ const s=fs.readFileSync(p,"utf8"); fs.writeFileSync(p,s.split(key).join("[REDACTED]")); }' "$run_dir/opencode.log"
             return "$status"
           }
 
