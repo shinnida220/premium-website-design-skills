@@ -1,0 +1,112 @@
+name: Northstar OpenCode independent review
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Completed OpenCode benchmark run ID (artifact must still be retained)
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: northstar-opencode-independent-review-${{ inputs.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    name: Browser, accessibility, and performance review
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out review harness
+        uses: actions/checkout@v4
+
+      - name: Download paired OpenCode build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: northstar-opencode-${{ inputs.run_id }}
+          path: artifacts
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify expected build outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          for condition in baseline pwds; do
+            for file in index.html pricing.html product.html; do
+              test -s "artifacts/$condition/$file" || {
+                echo "::error::Missing artifacts/$condition/$file"
+                exit 1
+              }
+            done
+          done
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: evaluations/2026-11-premium-saas/review/package.json
+
+      - name: Install review dependencies and Chromium
+        working-directory: evaluations/2026-11-premium-saas/review
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Run independent browser and axe review
+        shell: bash
+        working-directory: evaluations/2026-11-premium-saas/review
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/review-results"
+          for condition in baseline pwds; do
+            PORT=4173 node server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "$GITHUB_WORKSPACE/review-results/$condition-server.log" 2>&1 &
+            server_pid=$!
+            trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+            for attempt in {1..30}; do
+              if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+              sleep 1
+            done
+            curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+            CONDITION="$condition" OUTPUT_DIR="$GITHUB_WORKSPACE/review-results/$condition" BASE_URL=http://127.0.0.1:4173 node review.mjs
+            kill "$server_pid"
+            wait "$server_pid" 2>/dev/null || true
+            trap - EXIT
+          done
+
+      - name: Run Lighthouse desktop and mobile audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(node -e 'process.stdout.write(require("./evaluations/2026-11-premium-saas/review/node_modules/playwright").chromium.executablePath())')"
+          for condition in baseline pwds; do
+            PORT=4173 node evaluations/2026-11-premium-saas/review/server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "review-results/$condition-lighthouse-server.log" 2>&1 &
+            server_pid=$!
+            for attempt in {1..30}; do
+              if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+              sleep 1
+            done
+            mkdir -p "review-results/$condition/lighthouse"
+            for route in / /pricing.html /product.html; do
+              slug="$(echo "$route" | sed 's#^/$#home#; s#^/##; s#\.html$##')"
+              npx --yes lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-desktop.json" --preset=desktop
+              npx --yes lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-mobile.json"
+            done
+            kill "$server_pid"
+            wait "$server_pid" 2>/dev/null || true
+          done
+
+      - name: Upload independent review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: northstar-independent-review-${{ inputs.run_id }}
+          path: review-results
+          if-no-files-found: warn
+          retention-days: 30
