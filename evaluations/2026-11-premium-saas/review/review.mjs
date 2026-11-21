@@ -39,10 +39,11 @@ try {
   for (const route of routes) {
     const routeResult = { ...route, viewports: [] };
     for (const viewport of viewports) {
-      const page = await browser.newPage({
+      const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         deviceScaleFactor: 1
       });
+      const page = await context.newPage();
       const pageErrors = [];
       const consoleErrors = [];
       page.on("pageerror", error => pageErrors.push(error.message));
@@ -163,7 +164,7 @@ try {
       if (axe.violations.some(v => v.impact === "critical" || v.impact === "serious")) {
         results.hardGates.noCriticalOrSeriousAxeViolations = false;
       }
-      await page.close();
+      await context.close();
     }
     results.routes.push(routeResult);
   }
