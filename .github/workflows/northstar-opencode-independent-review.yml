@@ -52,12 +52,14 @@ jobs:
           node-version: 22
 
       - name: Install review dependencies and Chromium
+        id: install-review-dependencies
         working-directory: evaluations/2026-11-premium-saas/review
         run: |
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
       - name: Run independent browser and axe review
+        id: browser-review
         shell: bash
         working-directory: evaluations/2026-11-premium-saas/review
         run: |
@@ -72,13 +74,16 @@ jobs:
               sleep 1
             done
             curl --fail --silent http://127.0.0.1:4173/ > /dev/null
-            CONDITION="$condition" OUTPUT_DIR="$GITHUB_WORKSPACE/review-results/$condition" BASE_URL=http://127.0.0.1:4173 node review.mjs
+            if ! CONDITION="$condition" OUTPUT_DIR="$GITHUB_WORKSPACE/review-results/$condition" BASE_URL=http://127.0.0.1:4173 node review.mjs; then
+              echo "::warning::The $condition review reported one or more hard-gate failures; continuing so the paired condition is still evaluated."
+            fi
             kill "$server_pid"
             wait "$server_pid" 2>/dev/null || true
             trap - EXIT
           done
 
       - name: Run Lighthouse desktop and mobile audits
+        if: ${{ !cancelled() && steps.install-review-dependencies.outcome == 'success' }}
         shell: bash
         working-directory: evaluations/2026-11-premium-saas/review
         run: |
