@@ -1,0 +1,13 @@
+{
+  "name": "premium-website-design-skills",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Portable agent skills for premium, distinctive, responsive website design and critique.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate": "node scripts/validate-skills.mjs"
+  }
+}
