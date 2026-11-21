@@ -50,8 +50,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: evaluations/2026-11-premium-saas/review/package.json
 
       - name: Install review dependencies and Chromium
         working-directory: evaluations/2026-11-premium-saas/review
@@ -82,9 +80,10 @@ jobs:
 
       - name: Run Lighthouse desktop and mobile audits
         shell: bash
+        working-directory: evaluations/2026-11-premium-saas/review
         run: |
           set -euo pipefail
-          CHROME="$(node -e 'process.stdout.write(require("./evaluations/2026-11-premium-saas/review/node_modules/playwright").chromium.executablePath())')"
+          CHROME="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')"
           for condition in baseline pwds; do
             PORT=4173 node evaluations/2026-11-premium-saas/review/server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "review-results/$condition-lighthouse-server.log" 2>&1 &
             server_pid=$!
@@ -95,7 +94,7 @@ jobs:
             mkdir -p "review-results/$condition/lighthouse"
             for route in / /pricing.html /product.html; do
               slug="$(echo "$route" | sed 's#^/$#home#; s#^/##; s#\.html$##')"
-              npx --yes lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-desktop.json" --preset=desktop
+              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-desktop.json" --preset=desktop
               npx --yes lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-mobile.json"
             done
             kill "$server_pid"
