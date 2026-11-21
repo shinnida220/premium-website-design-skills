@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">Semantic color palette reference</title><desc id="desc">Color swatches organized by semantic roles: canvas, surface, text, brand, success, warning, and danger.</desc>
+<rect width="1200" height="560" rx="24" fill="#f7f5f0"/><text x="64" y="72" font-family="Arial" font-size="16" letter-spacing="3" fill="#555">SEMANTIC TOKENS</text>
+<g font-family="Arial" font-size="17" fill="#222"><text x="64" y="136">Canvas</text><text x="64" y="244">Surface</text><text x="64" y="352">Text</text><text x="64" y="460">Brand + states</text></g>
+<g><rect x="240" y="100" width="180" height="64" rx="10" fill="#f4f1eb" stroke="#ccc"/><rect x="432" y="100" width="180" height="64" rx="10" fill="#ffffff" stroke="#ccc"/><rect x="624" y="100" width="180" height="64" rx="10" fill="#e8e2d8"/><rect x="816" y="100" width="180" height="64" rx="10" fill="#252525"/></g>
+<g font-family="Arial" font-size="13" fill="#555"><text x="240" y="184">canvas</text><text x="432" y="184">surface</text><text x="624" y="184">surface-muted</text><text x="816" y="184">text-primary</text></g>
+<g><rect x="240" y="208" width="180" height="64" rx="10" fill="#d9e4dc"/><rect x="432" y="208" width="180" height="64" rx="10" fill="#718d7b"/><rect x="624" y="208" width="180" height="64" rx="10" fill="#e4b85c"/><rect x="816" y="208" width="180" height="64" rx="10" fill="#b6534b"/></g>
+<g font-family="Arial" font-size="13" fill="#555"><text x="240" y="292">success-subtle</text><text x="432" y="292">brand-primary</text><text x="624" y="292">warning</text><text x="816" y="292">danger</text></g>
+<rect x="240" y="330" width="756" height="90" rx="12" fill="#252525"/><text x="270" y="370" font-family="Arial" font-size="20" fill="#fff">Semantic roles first</text><text x="270" y="398" font-family="Arial" font-size="14" fill="#ddd">Validate contrast and never rely on color alone to convey state.</text>
+<text x="64" y="500" font-family="Arial" font-size="14" fill="#777">Example palette only. Derive project tokens from brand, context, and contrast testing.</text></svg>
