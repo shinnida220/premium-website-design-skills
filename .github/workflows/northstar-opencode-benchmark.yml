@@ -43,6 +43,14 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate PWDS skill pack
+        run: node scripts/validate-skills.mjs
+
       - name: Install OpenCode CLI
         shell: bash
         run: |
