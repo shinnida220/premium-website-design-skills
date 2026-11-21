@@ -40,8 +40,18 @@ The orchestrator is the entry point. Specialist skills can also be used independ
 | `visual-composition` | Plans page hierarchy, grids, sections, whitespace, and visual rhythm |
 | `responsive-craft` | Specifies and implements responsive behavior across viewports and input modes |
 | `design-critique` | Reviews rendered UI, ranks defects, and drives measurable refinement |
+| `typography-mastery` | Creates readable, distinctive typographic systems |
+| `color-intelligence` | Builds semantic, contrast-aware color systems |
+| `premium-imagery` | Art-directs, selects, crops, and optimizes imagery |
+| `conversion-design` | Designs ethical conversion journeys and CTAs |
+| `interaction-design` | Specifies accessible interaction states and feedback |
+| `motion-design` | Creates purposeful, performant, reduced-motion-aware animation |
+| `dashboard-design` | Designs data-dense dashboards and operational interfaces |
+| `ecommerce-design` | Covers product discovery through checkout and order confirmation |
+| `mobile-web-design` | Prioritizes mobile tasks, touch, and constrained devices |
+| `visual-regression-review` | Reviews screenshot diffs and visual regressions |
 
-Additional specialist topics are documented in the roadmap, rather than being included as shallow or duplicative skills.
+The specialist skills are independently loadable. Start with the orchestrator for broad work, then load only the specialists relevant to the project's needs.
 
 ## Quick start
 
