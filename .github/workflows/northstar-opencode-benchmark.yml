@@ -23,7 +23,6 @@ jobs:
     timeout-minutes: 105
     env:
       MODEL: ${{ inputs.model }}
-      RUN_ROOT: ${{ runner.temp }}/northstar-opencode-runs
 
     steps:
       - name: Check out PWDS benchmark materials
@@ -67,6 +66,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           set -Eeuo pipefail
+          RUN_ROOT="${RUNNER_TEMP}/northstar-opencode-runs"
           mkdir -p "$RUN_ROOT"
 
           run_condition() {
