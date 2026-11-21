@@ -85,17 +85,17 @@ jobs:
           set -euo pipefail
           CHROME="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')"
           for condition in baseline pwds; do
-            PORT=4173 node evaluations/2026-11-premium-saas/review/server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "review-results/$condition-lighthouse-server.log" 2>&1 &
+            PORT=4173 node server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "$GITHUB_WORKSPACE/review-results/$condition-lighthouse-server.log" 2>&1 &
             server_pid=$!
             for attempt in {1..30}; do
               if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
               sleep 1
             done
-            mkdir -p "review-results/$condition/lighthouse"
+            mkdir -p "$GITHUB_WORKSPACE/review-results/$condition/lighthouse"
             for route in / /pricing.html /product.html; do
               slug="$(echo "$route" | sed 's#^/$#home#; s#^/##; s#\.html$##')"
-              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-desktop.json" --preset=desktop
-              npx --yes lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="review-results/$condition/lighthouse/$slug-mobile.json"
+              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="$GITHUB_WORKSPACE/review-results/$condition/lighthouse/$slug-desktop.json" --preset=desktop
+              ./node_modules/.bin/lighthouse "http://127.0.0.1:4173$route" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --output=json --output-path="$GITHUB_WORKSPACE/review-results/$condition/lighthouse/$slug-mobile.json"
             done
             kill "$server_pid"
             wait "$server_pid" 2>/dev/null || true
