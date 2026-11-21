@@ -7,6 +7,7 @@ Copy one per run. Score only observable evidence; mark unsupported dimensions "N
 - Run ID:
 - Condition: baseline / PWDS-assisted
 - Agent:
+- Provider / gateway:
 - Agent version:
 - Model:
 - Model version:
