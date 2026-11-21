@@ -65,6 +65,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/review-results"
+          review_failed=0
           for condition in baseline pwds; do
             PORT=4173 node server.mjs "$GITHUB_WORKSPACE/artifacts/$condition" > "$GITHUB_WORKSPACE/review-results/$condition-server.log" 2>&1 &
             server_pid=$!
@@ -75,12 +76,14 @@ jobs:
             done
             curl --fail --silent http://127.0.0.1:4173/ > /dev/null
             if ! CONDITION="$condition" OUTPUT_DIR="$GITHUB_WORKSPACE/review-results/$condition" BASE_URL=http://127.0.0.1:4173 node review.mjs; then
+              review_failed=1
               echo "::warning::The $condition review reported one or more hard-gate failures; continuing so the paired condition is still evaluated."
             fi
             kill "$server_pid"
             wait "$server_pid" 2>/dev/null || true
             trap - EXIT
           done
+          exit "$review_failed"
 
       - name: Run Lighthouse desktop and mobile audits
         if: ${{ !cancelled() && steps.install-review-dependencies.outcome == 'success' }}
